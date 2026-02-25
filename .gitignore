@@ -1,0 +1,40 @@
+# Rust build artifacts
+/target/
+Cargo.lock.bak
+
+# Bioinformatics large files — never commit these
+*.bam
+*.bai
+*.cram
+*.crai
+*.fa
+*.fasta
+*.fai
+*.vcf
+*.vcf.gz
+*.bcf
+
+# Generated analysis files
+microsatellites.list
+*.list
+
+# msi-calc output directories
+msi-results/
+msi-results-*/
+
+# Log and temporary files
+*.log
+*.tmp
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+
+# Environment files
+.env
