@@ -578,10 +578,7 @@ fn render_screen(
     } else {
         "  Ctrl+C to cancel"
     };
-    let timestamp = format!(
-        "Updated: {} ",
-        chrono::Local::now().format("%H:%M:%S")
-    );
+    let timestamp = format!("Updated: {} ", chrono::Local::now().format("%H:%M:%S"));
     let footer_pad = w
         .saturating_sub(2)
         .saturating_sub(cancel_hint.len())
@@ -622,11 +619,7 @@ pub(crate) struct DisplayThread {
 }
 
 impl DisplayThread {
-    pub fn start(
-        state: Arc<ProgressState>,
-        parallel_jobs: usize,
-        resumed: usize,
-    ) -> Self {
+    pub fn start(state: Arc<ProgressState>, parallel_jobs: usize, resumed: usize) -> Self {
         let flag = Arc::new(AtomicBool::new(false));
         let display_flag = Arc::clone(&flag);
 

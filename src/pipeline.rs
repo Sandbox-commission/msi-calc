@@ -74,6 +74,7 @@ fn run_cancellable(mut cmd: Command) -> Result<bool, String> {
 
 // ─── Phase 1: Profile normals ───────────────────────────────────────────────
 
+#[allow(clippy::too_many_arguments)]
 fn profile_normal(
     normal_bam: &Path,
     baseline_dir: &Path,
@@ -157,6 +158,7 @@ fn profile_normal(
 
 // ─── Phase 3: Process samples ───────────────────────────────────────────────
 
+#[allow(clippy::too_many_arguments)]
 fn process_sample(
     output_dir: &Path,
     log_dir: &Path,
@@ -289,23 +291,21 @@ where
             let errs = &errors;
             let w = &worker;
             let st = &state;
-            s.spawn(move || {
-                loop {
-                    if crate::is_cancelled() {
-                        break;
-                    }
-                    let idx = next.fetch_add(1, Ordering::Relaxed);
-                    if idx >= items.len() {
-                        break;
-                    }
-                    if let Err(e) = w(&items[idx], slot) {
-                        if e != "Cancelled" {
-                            errs.lock().unwrap().push(e);
-                        }
-                    }
-                    st.clear_slot(slot);
-                    std::thread::yield_now();
+            s.spawn(move || loop {
+                if crate::is_cancelled() {
+                    break;
                 }
+                let idx = next.fetch_add(1, Ordering::Relaxed);
+                if idx >= items.len() {
+                    break;
+                }
+                if let Err(e) = w(&items[idx], slot) {
+                    if e != "Cancelled" {
+                        errs.lock().unwrap().push(e);
+                    }
+                }
+                st.clear_slot(slot);
+                std::thread::yield_now();
             });
         }
     });
@@ -548,8 +548,7 @@ pub(crate) fn run(config: Config, pairs_file: PathBuf) -> ExitCode {
             display2.stop();
             baseline_file = Some(baseline_output);
         } else {
-            let phase2_label =
-                "PHASE 2/3: Building baseline from normal profiles".to_string();
+            let phase2_label = "PHASE 2/3: Building baseline from normal profiles".to_string();
             let state2 = Arc::new(ProgressState::new(1, parallel_jobs, &phase2_label));
             state2.add_event("  INFO  Creating baseline configure file...".to_string());
 
@@ -599,9 +598,7 @@ pub(crate) fn run(config: Config, pairs_file: PathBuf) -> ExitCode {
                 }
                 Ok(false) => {
                     state2.failed.fetch_add(1, Ordering::Relaxed);
-                    state2.add_event(
-                        "  FAIL  Baseline build exited with error".to_string(),
-                    );
+                    state2.add_event("  FAIL  Baseline build exited with error".to_string());
                     all_errors.push("Baseline build failed".to_string());
                 }
                 Err(e) => {
@@ -714,10 +711,7 @@ pub(crate) fn run(config: Config, pairs_file: PathBuf) -> ExitCode {
         tumor_only.len()
     );
     if already_done > 0 {
-        println!(
-            "  \u{2551}  Resumed (skip):   {:<25}\u{2551}",
-            already_done
-        );
+        println!("  \u{2551}  Resumed (skip):   {:<25}\u{2551}", already_done);
     }
     println!("  \u{2551}  Succeeded:        {:<25}\u{2551}", succeeded);
     println!("  \u{2551}  Failed:           {:<25}\u{2551}", failed);
@@ -749,10 +743,7 @@ pub(crate) fn run(config: Config, pairs_file: PathBuf) -> ExitCode {
         "  \u{2551}  Results:  {:<35}\u{2551}",
         config.output_dir.display()
     );
-    println!(
-        "  \u{2551}  Logs:     {:<35}\u{2551}",
-        log_dir.display()
-    );
+    println!("  \u{2551}  Logs:     {:<35}\u{2551}", log_dir.display());
     if needs_baseline {
         println!(
             "  \u{2551}  Baseline: {:<35}\u{2551}",

@@ -170,35 +170,19 @@ pub(crate) fn usage() {
     eprintln!("                     Tumor-only -> msisensor-pro pro (using baseline)");
     eprintln!();
     eprintln!("OPTIONS:");
-    eprintln!(
-        "    -r, --reference <FASTA> Path to reference genome FASTA (.fa/.fasta)."
-    );
-    eprintln!(
-        "                            REQUIRED. Auto-runs 'msisensor-pro scan' on first"
-    );
-    eprintln!(
-        "                            use to generate <output>/microsatellites.list."
-    );
-    eprintln!(
-        "                            The list is cached; subsequent runs skip scan."
-    );
-    eprintln!(
-        "    -p, --pairs <FILE>      Input CSV with tumor,normal BAM filenames"
-    );
+    eprintln!("    -r, --reference <FASTA> Path to reference genome FASTA (.fa/.fasta).");
+    eprintln!("                            REQUIRED. Auto-runs 'msisensor-pro scan' on first");
+    eprintln!("                            use to generate <output>/microsatellites.list.");
+    eprintln!("                            The list is cached; subsequent runs skip scan.");
+    eprintln!("    -p, --pairs <FILE>      Input CSV with tumor,normal BAM filenames");
     eprintln!("                            [default: {DEFAULT_PAIRS}]");
-    eprintln!(
-        "    -o, --output <DIR>      Directory to write MSI results"
-    );
+    eprintln!("    -o, --output <DIR>      Directory to write MSI results");
     eprintln!("                            [default: {DEFAULT_OUTPUT}]");
-    eprintln!(
-        "    -j, --jobs <N>          Number of samples to process in parallel"
-    );
+    eprintln!("    -j, --jobs <N>          Number of samples to process in parallel");
     eprintln!(
         "                            [default: {default_jobs} (auto: {total_cpus} CPUs, {ram_gb:.0} GB RAM)]"
     );
-    eprintln!(
-        "    -t, --threads <N>       Threads allocated per msisensor-pro job"
-    );
+    eprintln!("    -t, --threads <N>       Threads allocated per msisensor-pro job");
     eprintln!(
         "                            [default: {default_threads} (auto: {total_cpus} CPUs / {default_jobs} jobs)]"
     );
@@ -210,15 +194,9 @@ pub(crate) fn usage() {
     eprintln!();
     eprintln!("    Optional JSON config to set defaults (CLI flags override):");
     eprintln!("    {{");
-    eprintln!(
-        "      \"reference\": \"/path/to/reference.fa\","
-    );
-    eprintln!(
-        "      \"pairs\": \"/path/to/sample_pairs.csv\","
-    );
-    eprintln!(
-        "      \"msisensor_env\": \"/path/to/conda/env\""
-    );
+    eprintln!("      \"reference\": \"/path/to/reference.fa\",");
+    eprintln!("      \"pairs\": \"/path/to/sample_pairs.csv\",");
+    eprintln!("      \"msisensor_env\": \"/path/to/conda/env\"");
     eprintln!("    }}");
     eprintln!();
     eprintln!("INPUT FORMAT:");
@@ -227,99 +205,51 @@ pub(crate) fn usage() {
     eprintln!("    Both types can be mixed in the same file.");
     eprintln!();
     eprintln!("    Example (sample_pairs.csv):");
-    eprintln!(
-        "        50T_CRC_final.bam,50N_CRC_final.bam    # paired"
-    );
-    eprintln!(
-        "        91T_CRC_final.bam,91N_CRC_final.bam    # paired"
-    );
-    eprintln!(
-        "        78T_CRC_final.bam,                      # tumor-only"
-    );
-    eprintln!(
-        "        19T_CRC_final.bam,                      # tumor-only"
-    );
+    eprintln!("        50T_CRC_final.bam,50N_CRC_final.bam    # paired");
+    eprintln!("        91T_CRC_final.bam,91N_CRC_final.bam    # paired");
+    eprintln!("        78T_CRC_final.bam,                      # tumor-only");
+    eprintln!("        19T_CRC_final.bam,                      # tumor-only");
     eprintln!();
-    eprintln!(
-        "    Sample names are derived by stripping '_final.bam' from the"
-    );
-    eprintln!(
-        "    tumor BAM filename (e.g. 50T_CRC_final.bam -> 50T_CRC)."
-    );
-    eprintln!(
-        "    Already-processed samples are automatically skipped on resume."
-    );
+    eprintln!("    Sample names are derived by stripping '_final.bam' from the");
+    eprintln!("    tumor BAM filename (e.g. 50T_CRC_final.bam -> 50T_CRC).");
+    eprintln!("    Already-processed samples are automatically skipped on resume.");
     eprintln!();
     eprintln!("REFERENCE:");
-    eprintln!(
-        "    On first run, msi-calc scans the FASTA to generate a microsatellite loci"
-    );
-    eprintln!(
-        "    list using: msisensor-pro scan -d <ref.fa> -o <output>/microsatellites.list"
-    );
-    eprintln!(
-        "    The file is cached; subsequent runs skip the scan step automatically."
-    );
+    eprintln!("    On first run, msi-calc scans the FASTA to generate a microsatellite loci");
+    eprintln!("    list using: msisensor-pro scan -d <ref.fa> -o <output>/microsatellites.list");
+    eprintln!("    The file is cached; subsequent runs skip the scan step automatically.");
     eprintln!("    Minimum coverage (-c):   20");
     eprintln!();
     eprintln!("OUTPUT STRUCTURE:");
     eprintln!("    <output>/");
-    eprintln!(
-        "      <sample>              MSI result files per sample"
-    );
-    eprintln!(
-        "      <sample>_msisensor    Additional msisensor output"
-    );
-    eprintln!(
-        "      logs/                 Per-sample log files (.log)"
-    );
-    eprintln!(
-        "      baseline/             (only when tumor-only samples present)"
-    );
-    eprintln!(
-        "        baseline_config.txt   Configure file for baseline build"
-    );
-    eprintln!(
-        "        baseline_model        Built baseline model"
-    );
-    eprintln!(
-        "        <normal>_all          Normal sample profiles"
-    );
+    eprintln!("      <sample>              MSI result files per sample");
+    eprintln!("      <sample>_msisensor    Additional msisensor output");
+    eprintln!("      logs/                 Per-sample log files (.log)");
+    eprintln!("      baseline/             (only when tumor-only samples present)");
+    eprintln!("        baseline_config.txt   Configure file for baseline build");
+    eprintln!("        baseline_model        Built baseline model");
+    eprintln!("        <normal>_all          Normal sample profiles");
     eprintln!();
     eprintln!("EXAMPLES:");
     eprintln!("    # Basic run (reference is required)");
-    eprintln!(
-        "    msi-calc -r /data/GRCh38.fa -p sample_pairs.csv"
-    );
+    eprintln!("    msi-calc -r /data/GRCh38.fa -p sample_pairs.csv");
     eprintln!();
     eprintln!("    # Specify output directory");
-    eprintln!(
-        "    msi-calc -r /data/GRCh38.fa -p pairs.csv -o /data/msi-results"
-    );
+    eprintln!("    msi-calc -r /data/GRCh38.fa -p pairs.csv -o /data/msi-results");
     eprintln!();
     eprintln!("    # Use 8 parallel jobs with 4 threads each");
-    eprintln!(
-        "    msi-calc -r /data/GRCh38.fa -p pairs.csv -j 8 -t 4"
-    );
+    eprintln!("    msi-calc -r /data/GRCh38.fa -p pairs.csv -j 8 -t 4");
     eprintln!();
-    eprintln!(
-        "    # Resume an interrupted run (same command, scan step is skipped automatically)"
-    );
-    eprintln!(
-        "    msi-calc -r /data/GRCh38.fa -p pairs.csv -o msi-results"
-    );
+    eprintln!("    # Resume an interrupted run (same command, scan step is skipped automatically)");
+    eprintln!("    msi-calc -r /data/GRCh38.fa -p pairs.csv -o msi-results");
     eprintln!();
     eprintln!("NOTE:");
     eprintln!(
         "    Total CPU usage = jobs x threads (auto: {default_jobs} x {default_threads} = {} cores).",
         default_jobs * default_threads as usize
     );
-    eprintln!(
-        "    Resources auto-detected: {total_cpus} CPUs, {ram_gb:.1} GB RAM available."
-    );
-    eprintln!(
-        "    ~2 GB RAM reserved per job, 2 GB reserved for OS."
-    );
+    eprintln!("    Resources auto-detected: {total_cpus} CPUs, {ram_gb:.1} GB RAM available.");
+    eprintln!("    ~2 GB RAM reserved per job, 2 GB reserved for OS.");
     eprintln!("    Override with -j and -t if needed.");
     eprintln!("    Press Ctrl+C to gracefully stop (kills running processes).");
     eprintln!();
@@ -390,13 +320,8 @@ pub(crate) fn parse_args() -> Option<Config> {
         .or_else(|| file_cfg.reference.map(PathBuf::from))
         .unwrap_or_else(|| {
             eprintln!("Error: -r / --reference <FASTA> is required.");
-            eprintln!(
-                "       Provide the path to your reference genome (.fa or .fasta)."
-            );
-            eprintln!(
-                "       Or set \"reference\" in {}",
-                config_dir_display()
-            );
+            eprintln!("       Provide the path to your reference genome (.fa or .fasta).");
+            eprintln!("       Or set \"reference\" in {}", config_dir_display());
             usage();
             std::process::exit(1);
         });

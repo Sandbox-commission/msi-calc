@@ -21,10 +21,7 @@ pub(crate) fn remove_checkpoint(output_dir: &Path, name: &str) {
 }
 
 /// Check if a sample completed successfully (checkpoint exists)
-pub(crate) fn sample_is_done(
-    output_dir: &Path,
-    tumor_bam: &Path,
-) -> bool {
+pub(crate) fn sample_is_done(output_dir: &Path, tumor_bam: &Path) -> bool {
     let name = crate::config::sample_name(tumor_bam);
     checkpoint_dir(output_dir)
         .join(format!("{name}.done"))
