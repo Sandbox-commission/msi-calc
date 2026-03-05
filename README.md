@@ -1,29 +1,48 @@
 # msi-calc
 
+[![CI](https://github.com/Sandbox-commission/msi-calc/actions/workflows/ci.yml/badge.svg)](https://github.com/Sandbox-commission/msi-calc/actions/workflows/ci.yml)
+
 Microsatellite instability (MSI) analysis using [msisensor-pro](https://github.com/xjtu-omics/msisensor-pro),
 with a full-screen TUI, parallel job execution, and resume support.
 
 ## Requirements
 
-- **msisensor-pro** ≥ 2.0 (installed via bioconda or built from source)
-- **Rust** ≥ 1.70 (for building from source; not needed when using Docker)
+- **msisensor-pro** >= 2.0 (installed via bioconda or built from source)
+- **Rust** >= 1.70 (for building from source; not needed when using Docker)
 - A reference genome FASTA file (e.g., GRCh38)
 - Indexed BAM files
 
 ---
 
-## Quick Start: Docker (recommended)
+## Installation
 
-### Build the image
+Run the interactive setup script which provides three installation paths:
+
+```bash
+git clone https://github.com/Sandbox-commission/msi-calc.git
+cd msi-calc
+chmod +x setup.sh
+./setup.sh
+```
+
+| Method | Description |
+|--------|-------------|
+| **Docker** (recommended) | Builds a container with msisensor-pro + msi-calc, creates `docker-run.sh` |
+| **Mamba/Conda** (automatic) | Auto-detects/installs Miniforge, installs msisensor-pro, builds binary, writes config |
+| **Manual** | Provides links and step-by-step instructions |
+
+See [INSTALLATION_GUIDE.md](INSTALLATION_GUIDE.md) for detailed instructions.
+
+---
+
+## Quick Start
+
+### Docker
 
 ```bash
 docker build -t msi-calc .
-```
 
-### Run
-
-```bash
-docker run --rm \
+docker run --rm -it \
   -v /host/reference:/data/ref:ro \
   -v /host/bams:/data/bams:ro \
   -v /host/results:/data/output \
@@ -33,51 +52,15 @@ docker run --rm \
     -o /data/output
 ```
 
+### Native
+
+```bash
+msi-calc -r /data/GRCh38.fa -p sample_pairs.csv
+```
+
 On first run, msi-calc automatically generates
-`/data/output/microsatellites.list` using `msisensor-pro scan`.
+`<output>/microsatellites.list` using `msisensor-pro scan`.
 Subsequent runs skip this step.
-
----
-
-## Manual Install
-
-### Option A: `setup.sh` (Linux / macOS)
-
-```bash
-git clone <repo-url>
-cd msi-calc
-chmod +x setup.sh
-./setup.sh
-```
-
-The script will:
-1. Install msisensor-pro (via conda/mamba or from source)
-2. Install Rust via rustup if needed
-3. Build msi-calc with `cargo build --release`
-
-### Option B: Step-by-step
-
-**Install msisensor-pro** (if conda is available):
-
-```bash
-conda install -c bioconda -c conda-forge msisensor-pro
-```
-
-**Or build from source:**
-
-```bash
-git clone https://github.com/xjtu-omics/msisensor-pro
-cd msisensor-pro && mkdir build && cd build
-cmake .. && make -j4
-sudo cp ../msisensor-pro /usr/local/bin/
-```
-
-**Build msi-calc:**
-
-```bash
-cargo build --release
-# binary: ./target/release/msi-calc
-```
 
 ---
 
@@ -89,14 +72,15 @@ msi-calc -r <FASTA> [OPTIONS]
 
 ### Options
 
-```
--r, --reference <FASTA>   Reference genome (.fa or .fasta). REQUIRED.
--p, --pairs <FILE>        Sample pairs CSV [default: sample_pairs.csv]
--o, --output <DIR>        Output directory [default: msi-results]
--j, --jobs <N>            Parallel jobs [default: 16]
--t, --threads <N>         Threads per job [default: 2]
--h, --help                Print help
-```
+| Flag | Description | Default |
+|------|-------------|---------|
+| `-r, --reference <FASTA>` | Reference genome (.fa/.fasta). **Required.** | — |
+| `-p, --pairs <FILE>` | Sample pairs CSV | `sample_pairs.csv` |
+| `-o, --output <DIR>` | Output directory | `msi-results` |
+| `-j, --jobs <N>` | Parallel jobs | Auto-detected from CPU count |
+| `-t, --threads <N>` | Threads per job | `2` |
+| `-V, --version` | Print version and exit | — |
+| `-h, --help` | Print help | — |
 
 ### Examples
 
@@ -107,11 +91,26 @@ msi-calc -r /data/GRCh38.fa -p sample_pairs.csv
 # Custom paths
 msi-calc -r /data/GRCh38.fa -p /data/pairs.csv -o /data/results
 
-# 8 jobs × 4 threads = 32 cores
+# 8 jobs x 4 threads = 32 cores
 msi-calc -r /data/GRCh38.fa -p pairs.csv -j 8 -t 4
 
 # Resume an interrupted run — same command, same output directory
 msi-calc -r /data/GRCh38.fa -p pairs.csv -o /data/results
+```
+
+---
+
+## Config File
+
+msi-calc supports an optional config file at `~/.config/msi-calc/config.json`
+to set defaults (CLI flags always override):
+
+```json
+{
+  "reference": "/path/to/reference.fa",
+  "pairs": "/path/to/sample_pairs.csv",
+  "msisensor_env": "/path/to/conda/env"
+}
 ```
 
 ---
@@ -153,6 +152,17 @@ Sample names are derived by stripping `_final.bam`.
 
 ---
 
+## Modes
+
+| CSV contents | Mode | Phases |
+|---|---|---|
+| All paired samples | Paired-only | Phase 1/1: msisensor-pro msi |
+| Mixed paired + tumor-only | Mixed | Phase 1/3: profile normals, 2/3: build baseline, 3/3: MSI |
+
+Tumor-only-only is not supported (a paired sample is needed to build the baseline).
+
+---
+
 ## Resume Behaviour
 
 msi-calc is resume-aware at every phase:
@@ -166,24 +176,26 @@ Re-run the exact same command after any interruption to continue.
 
 ---
 
-## Modes
+## Architecture
 
-| CSV contents | Mode | Phases |
-|---|---|---|
-| All paired samples | Paired-only | Phase 1/1: msisensor-pro msi |
-| Mixed paired + tumor-only | Mixed | Phase 1/3: profile normals, 2/3: build baseline, 3/3: MSI |
-
-Tumor-only-only is not supported (a paired sample is needed to build the baseline).
+```
+src/
+  main.rs        Entry point, signal handling, interactive prompts
+  config.rs      Config struct, arg parsing, usage text, config file loading
+  pipeline.rs    Sample processing, work queue, run() orchestration
+  checkpoint.rs  Checkpoint read/write for resume support
+  tui.rs         Full-screen TUI rendering, progress state, display thread
+```
 
 ---
 
 ## Resource Tuning
 
-Total CPU = `--jobs` × `--threads` (default: 16 × 2 = 32 cores).
+Total CPU = `--jobs` x `--threads` (jobs default is auto-detected from CPU count).
 Adjust to your hardware:
 
 ```bash
-# 64-core machine: 16 jobs × 4 threads
+# 64-core machine: 16 jobs x 4 threads
 msi-calc -r ref.fa -p pairs.csv -j 16 -t 4
 ```
 
@@ -192,13 +204,14 @@ partial outputs are cleaned up. Re-run to resume.
 
 ---
 
-## Reference Scanning
+## Reference
 
-On first run, msi-calc automatically scans the reference FASTA to generate a
-microsatellite loci list (`<output>/microsatellites.list`) using:
+msisensor-pro: Jia P et al. *MSIsensor-pro: Fast, Accurate, and Matched-normal-free
+Detection of Microsatellite Instability.* Genomics Proteomics Bioinformatics (2020).
+[PMID: 32171661](https://pubmed.ncbi.nlm.nih.gov/32171661/)
 
-```
-msisensor-pro scan -d <ref.fa> -o <output>/microsatellites.list
-```
+---
 
-The file is cached; subsequent runs skip the scan step automatically.
+## License
+
+[MIT](LICENSE)

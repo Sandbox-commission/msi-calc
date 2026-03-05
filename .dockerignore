@@ -1,0 +1,10 @@
+target/
+.git/
+.github/
+*.md
+.DS_Store
+*.swp
+*.swo
+*~
+.claude/
+msi-results/

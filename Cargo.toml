@@ -1,9 +1,19 @@
 [package]
 name = "msi-calc"
-version = "0.1.0"
+version = "0.3.0"
 edition = "2021"
+description = "Microsatellite instability (MSI) analysis using msisensor-pro"
+license = "MIT"
+
+[[bin]]
+name = "msi-calc"
+path = "src/main.rs"
 
 [dependencies]
 chrono = "0.4"
 crossterm = "0.28"
 csv = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+log = "0.4"
+env_logger = "0.11"

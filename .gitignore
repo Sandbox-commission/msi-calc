@@ -38,3 +38,9 @@ msi-results-*/
 
 # Environment files
 .env
+
+# Claude Code
+.claude/
+
+# Config files (user-specific)
+config.json
